@@ -11,19 +11,39 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: pnpm
 
       - name: Install Deno
         uses: denoland/setup-deno@v1
 
+      - name: Install dependencies
+        run: pnpm install
+
       - name: Build
-        run: |
-          deno run -A calculate.ts
-          deno run -A bundle.ts
+        run: pnpm build
 
       - name: Deploy to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: svgclock
+          project: purge
+          root: dist/deno
           entrypoint: server.js
-          root: dist
+
+      - name: Deploy to Cloudflare Workers
+        run: |
+          echo "${{ secrets.PURGE_TOKEN }}" | pnpm wrangler secret put PURGE_TOKEN
+          pnpm wrangler publish
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}

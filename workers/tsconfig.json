@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "module": "esnext",
+    "target": "esnext",
+    "lib": [
+      "esnext"
+    ],
+    "strict": true,
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": true,
+    "types": [
+      "@cloudflare/workers-types"
+    ]
+  }
+}

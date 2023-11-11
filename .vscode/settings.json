@@ -1,6 +1,13 @@
 {
+  "cSpell.words": [
+    "camo",
+    "outfile",
+    "svgclock",
+    "typecheck"
+  ],
   "deno.enable": true,
-  "yaml.schemas": {
-    "https://json.schemastore.org/github-workflow.json": "file:///d%3A/Projects/Studies/svgclock2/.github/workflow/deploy.yml"
-  }
+  "deno.unstable": true,
+  "deno.enablePaths": [
+    "./deno"
+  ]
 }

@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises";
+
 const DIGITS = [0x7e, 0x30, 0x6d, 0x79, 0x33, 0x5b, 0x5f, 0x70, 0x7f, 0x7b];
 const POLYS = [
   "12,90 22,81 79,81 88,90 79,100 22,100",
@@ -63,19 +65,22 @@ const DISPLAYS = [
     period: 10,
     x: 140 * 5 + 40 * 2,
   },
-];
+] as const;
 
 const getClassName = (k: number, i: number): string =>
   `p${k.toString(36)}${i.toString(36)}`;
 
 function calculateDisplays() {
-  const calculated = [];
+  type Poly = { c: string; i: number; k: number[] };
+  type CalculatedDisplay = { x: number; k: number; m: number; p: Poly[] };
+
+  const calculated: CalculatedDisplay[] = [];
   for (const [k, { add, div, period, x }] of DISPLAYS.entries()) {
     if (!add || !div || !period) {
       continue;
     }
 
-    const polys = [];
+    const polys: Poly[] = [];
 
     for (const i of POLYS.keys()) {
       const keyframes: number[] = [];
@@ -196,4 +201,4 @@ export const PRECALCULATED_DISPLAYS = ${JSON.stringify(
 export function createSVG${createTemplate()}
 `;
 
-await Deno.writeTextFile("src/generated.ts", script);
+await writeFile("workers/generated.ts", script);
