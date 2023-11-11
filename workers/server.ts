@@ -1,6 +1,7 @@
 import { createSVG } from "./utils.ts";
 
 const WAIT_BEFORE_PURGE = 1000;
+const USER_AGENT = "svg-clock/1.0.0";
 
 export interface Env {
   readonly PURGE_TOKEN: string;
@@ -70,6 +71,7 @@ export default {
             headers: {
               Authorization: `Bearer ${env.PURGE_TOKEN}`,
               "Content-Type": "application/json",
+              "User-Agent": USER_AGENT,
             },
             body: JSON.stringify({
               url: url.toString(),

@@ -1,6 +1,8 @@
 const KV_KEY_SPACE_GITHUB_CAMO = "ghCamo";
 const KV_EXPIRES_IN = 24 * 60 * 60 * 1000;
 
+const USER_AGENT = "purge.deno.dev";
+
 function isAllowedURL(url: URL): boolean {
   return url.hostname === "svgclock.abelia.workers.dev";
 }
@@ -28,6 +30,7 @@ async function getGitHubCamoURL(url: string): Promise<string> {
     headers: {
       Accept: "text/html",
       "Content-Type": "application/json",
+      "User-Agent": USER_AGENT,
       "X-GitHub-Api-Version": "2022-11-28",
     },
     body: JSON.stringify({
@@ -109,6 +112,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const res = await fetch(camoURL, {
       method: "PURGE",
+      headers: {
+        "User-Agent": USER_AGENT,
+      },
     });
     if (!res.ok) {
       return new Response(`Upstream returned ${res.status}`, { status: 502 });
