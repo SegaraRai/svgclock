@@ -6,6 +6,8 @@ const USER_AGENT = "svg-clock/1.0.0";
 const CLOCK_TIMESTAMP_OFFSET_CAMO = 200;
 const CLOCK_TIMESTAMP_OFFSET_NORMAL = 0;
 
+const REDIRECT_URL_REPOSITORY = "https://github.com/SegaraRai/svgclock";
+
 export interface Env {
   readonly PURGE_TOKEN: string;
 }
@@ -49,6 +51,11 @@ function getTimestampFromPathname(
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext): Response {
+    // no CORS support for now
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return new Response("Method not allowed", { status: 405 });
+    }
+
     const viaCamo = /camo/i.test(
       request.headers.get("User-Agent") ?? request.headers.get("Via") ?? ""
     );
@@ -58,6 +65,21 @@ export default {
     const timestamp = getTimestampFromPathname(url.pathname);
     if (!timestamp) {
       return new Response("Not found", { status: 404 });
+    }
+
+    if (!viaCamo && request.headers.get("Accept")?.includes("text/html")) {
+      if (url.searchParams.get("redirect") === "repository") {
+        return new Response(null, {
+          status: 303,
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+            "Content-Security-Policy": "default-src 'none'",
+            "Content-Type": "text/plain",
+            Location: REDIRECT_URL_REPOSITORY,
+            Vary: "Accept, User-Agent",
+          },
+        });
+      }
     }
 
     const [ts, dynamic] = timestamp;
@@ -94,12 +116,17 @@ export default {
       );
     }
 
-    return new Response(svg, {
+    const svgBinary = new TextEncoder().encode(svg);
+
+    return new Response(request.method === "HEAD" ? null : svgBinary, {
       headers: {
-        "Content-Type": "image/svg+xml",
         "Cache-Control": dynamic
           ? "private, no-cache, no-store, must-revalidate, max-age=0"
           : "public, max-age=3600",
+        "Content-Length": String(svgBinary.length),
+        "Content-Security-Policy":
+          "default-src 'none'; style-src 'unsafe-inline'",
+        "Content-Type": "image/svg+xml",
       },
     });
   },
