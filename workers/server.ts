@@ -56,7 +56,7 @@ export default {
     const [ts, dynamic] = timestamp;
     const svg = createSVG(ts, url.toString());
 
-    if (dynamic) {
+    if (dynamic && /camo/i.test(request.headers.get("User-Agent") || "")) {
       ctx.waitUntil(
         (async (): Promise<void> => {
           await new Promise((resolve) =>
