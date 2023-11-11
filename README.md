@@ -2,12 +2,12 @@
 
 ## UTC
 
-![SVG Clock](https://svgclock.deno.dev/utc+0000.svg)
+![SVG Clock](https://svgclock.abelia.workers.dev/utc.svg)
 
 ## JST (UTC+09:00)
 
-![SVG Clock](https://svgclock.deno.dev/utc+0900.svg)
+![SVG Clock](https://svgclock.abelia.workers.dev/utc+0900.svg)
 
 ## Count-up Timer
 
-![SVG Clock](https://svgclock.deno.dev/000000.000.svg)
+![SVG Clock](https://svgclock.abelia.workers.dev/000000.svg)
