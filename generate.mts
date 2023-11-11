@@ -73,12 +73,7 @@ const getClassName = (k: number, i: number): string =>
 
 function calculateDisplays() {
   type Poly = { c: string; i: number; k: number[] };
-  type CalculatedDisplay = {
-    x: number;
-    k: number;
-    d: number;
-    p: Poly[];
-  };
+  type CalculatedDisplay = { x: number; d: number; p: Poly[] };
 
   const calculated: CalculatedDisplay[] = [];
   for (const [k, { add, div, period, x }] of DISPLAYS.entries()) {
