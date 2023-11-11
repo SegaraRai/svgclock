@@ -1,57 +1,17 @@
-const KV_KEY_SPACE_GITHUB_CAMO = "ghCamo";
-const KV_EXPIRES_IN = 24 * 60 * 60 * 1000;
-
-const USER_AGENT = "purge.deno.dev";
-
-function isAllowedURL(url: URL): boolean {
-  return url.hostname === "svgclock.abelia.workers.dev";
-}
-
-function hexToBytes(hex: string): Uint8Array {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-  }
-  return bytes;
-}
-
-function timingSafeEqual(input: Uint8Array, expected: Uint8Array): boolean {
-  let diff = 0xff00 >>> 0;
-  for (let i = 0; i < expected.length; i++) {
-    diff |= input[i % expected.length] ^ expected[i];
-  }
-  return diff === 0xff00;
-}
-
-async function getGitHubCamoURL(url: string): Promise<string> {
-  // Rate-limit: 60 requests per hour
-  const res = await fetch("https://api.github.com/markdown", {
-    method: "POST",
-    headers: {
-      Accept: "text/html",
-      "Content-Type": "application/json",
-      "User-Agent": USER_AGENT,
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    body: JSON.stringify({
-      text: `![image](${url})`,
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`GitHub API returned ${res.status}`);
-  }
-
-  const text = await res.text();
-  const match = /src="([^"]+)"/.exec(text);
-  if (!match) {
-    throw new Error("GitHub API returned unexpected response");
-  }
-
-  return match[1];
-}
+import {
+  ENV_NAME_AUTH_TOKEN_SHA256,
+  KV_EXPIRES_IN,
+  KV_KEY_SPACE_GITHUB_CAMO,
+  USER_AGENT,
+  isAllowedURL,
+} from "./config.ts";
+import { fetchGitHubCamoURL, hexToBytes, timingSafeEqual } from "./utils.ts";
 
 const kv = await Deno.openKv();
-const expectedTokenSHA256 = hexToBytes(Deno.env.get("AUTH_TOKEN_SHA256") || "");
+
+const expectedTokenSHA256 = hexToBytes(
+  Deno.env.get(ENV_NAME_AUTH_TOKEN_SHA256) || ""
+);
 
 Deno.serve(async (req: Request): Promise<Response> => {
   const reqURL = new URL(req.url);
@@ -103,7 +63,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     ).value;
 
     if (!camoURL) {
-      camoURL = await getGitHubCamoURL(url);
+      camoURL = await fetchGitHubCamoURL(url);
 
       await kv.set([KV_KEY_SPACE_GITHUB_CAMO, url], camoURL, {
         expireIn: KV_EXPIRES_IN,
