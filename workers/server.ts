@@ -1,4 +1,4 @@
-import { createSVG } from "./utils.ts";
+import { createSVG, escapeHTML } from "./utils.ts";
 
 const WAIT_BEFORE_PURGE = 1000;
 const USER_AGENT = "svg-clock/1.0.0";
@@ -6,7 +6,7 @@ const USER_AGENT = "svg-clock/1.0.0";
 const CLOCK_TIMESTAMP_OFFSET_CAMO = 200;
 const CLOCK_TIMESTAMP_OFFSET_NORMAL = 0;
 
-const REDIRECT_URL_REPOSITORY = "https://github.com/SegaraRai/svgclock";
+const LINK_URL_REPOSITORY = "https://github.com/SegaraRai/svgclock";
 
 export interface Env {
   readonly PURGE_TOKEN: string;
@@ -61,26 +61,15 @@ export default {
     );
 
     const url = new URL(request.url);
+    const normalizedURL = url.toString();
 
     const timestamp = getTimestampFromPathname(url.pathname);
     if (!timestamp) {
       return new Response("Not found", { status: 404 });
     }
 
-    if (!viaCamo && request.headers.get("Accept")?.includes("text/html")) {
-      if (url.searchParams.get("redirect") === "repository") {
-        return new Response(null, {
-          status: 303,
-          headers: {
-            "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
-            "Content-Security-Policy": "default-src 'none'",
-            "Content-Type": "text/plain",
-            Location: REDIRECT_URL_REPOSITORY,
-            Vary: "Accept, User-Agent",
-          },
-        });
-      }
-    }
+    const linkURL =
+      url.searchParams.get("link") === "repository" ? LINK_URL_REPOSITORY : "";
 
     const [ts, dynamic] = timestamp;
     const tsWithOffset =
@@ -89,7 +78,13 @@ export default {
         ? CLOCK_TIMESTAMP_OFFSET_CAMO
         : CLOCK_TIMESTAMP_OFFSET_NORMAL);
 
-    const svg = createSVG(tsWithOffset, url.toString());
+    const extraContent = linkURL
+      ? `<a href="${escapeHTML(
+          linkURL
+        )}">\n<rect x="-40" y="-10" width="920" height="200" fill="transparent" stroke="none" />\n</a>\n`
+      : "";
+
+    const svg = createSVG(tsWithOffset, normalizedURL, extraContent);
 
     if (dynamic && viaCamo) {
       ctx.waitUntil(
@@ -109,7 +104,7 @@ export default {
               "User-Agent": USER_AGENT,
             },
             body: JSON.stringify({
-              url: url.toString(),
+              url: normalizedURL,
             }),
           });
         })()

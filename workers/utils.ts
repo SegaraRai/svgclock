@@ -3,7 +3,7 @@ import {
   createSVG as createSVGImported,
 } from "./generated.ts";
 
-function escapeHTML(str: string): string {
+export function escapeHTML(str: string): string {
   return str
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -50,9 +50,14 @@ export function createStyle(timestamp: number): string {
   return text;
 }
 
-export function createSVG(timestamp: number, linkURL: string): string {
+export function createSVG(
+  timestamp: number,
+  linkURL: string,
+  extraContent = ""
+): string {
   return createSVGImported({
     style: createStyle(timestamp),
     linkURL: escapeHTML(linkURL),
+    extraContent,
   });
 }

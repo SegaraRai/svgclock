@@ -669,7 +669,7 @@ export const PRECALCULATED_DISPLAYS = [
   }
 ] as const;
 
-export function createSVG({style, linkURL}: {style: string; linkURL: string;}) {
+export function createSVG({style, extraContent, linkURL}: {style: string; extraContent: string; linkURL: string;}) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -10 920 200">
 <style>
 ${style}
@@ -748,7 +748,7 @@ ${style}
 <use href="#s6" class="p76" />
 </g>
 </g>
-<g class="u">
+${extraContent}<g class="u">
 <a href="${linkURL}">
 <text x="860" y="235" stroke="none" fill="#2871fc" font-size="50" text-anchor="end" font-family="Verdana, Arial, Helvetica, sans-serif">Not working?</text>
 </a>

@@ -162,6 +162,8 @@ function createTemplate(): string {
 
   texts.push("</g>\n");
 
+  texts.push("%extraContent%");
+
   texts.push('<g class="u">\n');
   texts.push(`<a href="%linkURL%">\n`);
   texts.push(
