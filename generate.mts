@@ -10,7 +10,8 @@ const POLYS = [
   "90,12 100,22 100,79 90,88 80,79 81,22",
   "12,10 22,1 79,0 88,10 79,20 22,20",
 ];
-const CHANGE_DURATION = 0.1;
+
+const CHANGE_DURATION_MSEC = 100;
 
 const SKEW_X = "-12.5";
 const FILL_COLOR = "#2871fc";
@@ -72,7 +73,12 @@ const getClassName = (k: number, i: number): string =>
 
 function calculateDisplays() {
   type Poly = { c: string; i: number; k: number[] };
-  type CalculatedDisplay = { x: number; k: number; m: number; p: Poly[] };
+  type CalculatedDisplay = {
+    x: number;
+    k: number;
+    d: number;
+    p: Poly[];
+  };
 
   const calculated: CalculatedDisplay[] = [];
   for (const [k, { add, div, period, x }] of DISPLAYS.entries()) {
@@ -92,8 +98,8 @@ function calculateDisplays() {
         if (prev == null) {
           prev = on;
         } else if (prev !== on) {
-          keyframes.push(((sec / period) % 1) * 100);
-          keyframes.push((((sec + CHANGE_DURATION) / period) % 1) * 100);
+          keyframes.push(sec * 1000);
+          keyframes.push(sec * 1000 + CHANGE_DURATION_MSEC);
           prev = on;
         }
       }
@@ -112,8 +118,7 @@ function calculateDisplays() {
 
     calculated.push({
       x,
-      k: (1 / (period * 1000)) * 100,
-      m: period * 1000,
+      d: period,
       p: polys,
     });
   }
@@ -131,7 +136,7 @@ function createTemplate(): string {
   );
 
   texts.push("<style>\n");
-  texts.push("%style%\n");
+  texts.push("%style%");
   texts.push(".u { display: none; opacity: 0; }\n");
   texts.push("</style>\n");
 

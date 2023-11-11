@@ -16,19 +16,20 @@ function writeOpacity(on: boolean): string {
 }
 
 export function createStyle(timestamp: number): string {
-  const offsetMSec = timestamp % 86400_000;
+  const offsetMSec = 86400_000 - (timestamp % 86400_000);
 
   let text = "";
   for (const display of PRECALCULATED_DISPLAYS) {
-    const offset = 100 - ((offsetMSec * display.k) % 100);
+    const div = display.d * 10;
+    const div100 = display.d * 1000;
 
     for (const { c: className, i: initial, k: keyframes } of display.p) {
       if (keyframes.length) {
         let initialOn = !initial;
         let max = 0;
         text += `@keyframes k${className} {\n`;
-        for (const [i, percent] of keyframes.entries()) {
-          const p = (percent + offset) % 100;
+        for (const [i, msec] of keyframes.entries()) {
+          const p = ((msec + offsetMSec) % div100) / div;
           const mod = (i + initial) & 3;
           const on = mod === 0 || mod === 3;
           text += `${p}% { ${writeOpacity(on)} }\n`;
@@ -40,7 +41,7 @@ export function createStyle(timestamp: number): string {
         text += "}\n";
         text += `.${className} { ${writeOpacity(
           initialOn
-        )}; animation: k${className} ${display.m}ms ease infinite }\n`;
+        )}; animation: k${className} ${display.d}s ease infinite }\n`;
       } else {
         text += `.${className} { ${writeOpacity(!initial)} }\n`;
       }
