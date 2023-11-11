@@ -3,6 +3,9 @@ import { createSVG } from "./utils.ts";
 const WAIT_BEFORE_PURGE = 1000;
 const USER_AGENT = "svg-clock/1.0.0";
 
+const CLOCK_TIMESTAMP_OFFSET_CAMO = 200;
+const CLOCK_TIMESTAMP_OFFSET_NORMAL = 0;
+
 export interface Env {
   readonly PURGE_TOKEN: string;
 }
@@ -46,6 +49,10 @@ function getTimestampFromPathname(
 
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext): Response {
+    const viaCamo = /camo/i.test(
+      request.headers.get("User-Agent") ?? request.headers.get("Via") ?? ""
+    );
+
     const url = new URL(request.url);
 
     const timestamp = getTimestampFromPathname(url.pathname);
@@ -54,9 +61,15 @@ export default {
     }
 
     const [ts, dynamic] = timestamp;
-    const svg = createSVG(ts, url.toString());
+    const tsWithOffset =
+      ts +
+      (viaCamo && dynamic
+        ? CLOCK_TIMESTAMP_OFFSET_CAMO
+        : CLOCK_TIMESTAMP_OFFSET_NORMAL);
 
-    if (dynamic && /camo/i.test(request.headers.get("User-Agent") || "")) {
+    const svg = createSVG(tsWithOffset, url.toString());
+
+    if (dynamic && viaCamo) {
       ctx.waitUntil(
         (async (): Promise<void> => {
           await new Promise((resolve) =>
