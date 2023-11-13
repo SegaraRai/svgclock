@@ -666,7 +666,10 @@ export const PRECALCULATED_DISPLAYS = [
 export function createSVG({style, extraContent, linkURL}: {style: string; extraContent: string; linkURL: string;}) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -10 920 200">
 <style>
-${style}.u { display: none; opacity: 0; }
+${style}.u { opacity: 0; display: none }
+@media (prefers-color-scheme: dark) {
+:root { color-scheme: dark }
+}
 </style>
 <defs>
 <path id="s0" d="M12,90L22,81L79,81L88,90L79,100L22,100Z" />

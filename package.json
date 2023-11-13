@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "tsx generate.mts && tsx bundle.mts",
+    "generate": "tsx generate.mts",
+    "build": "pnpm generate && tsx bundle.mts",
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "typecheck": "tsc --noEmit && deno check --unstable deno/server.ts"

@@ -132,7 +132,10 @@ function createTemplate(): string {
 
   texts.push("<style>\n");
   texts.push("%style%");
-  texts.push(".u { display: none; opacity: 0; }\n");
+  texts.push(".u { opacity: 0; display: none }\n");
+  texts.push("@media (prefers-color-scheme: dark) {\n");
+  texts.push(":root { color-scheme: dark }\n");
+  texts.push("}\n");
   texts.push("</style>\n");
 
   texts.push("<defs>\n");
