@@ -1,4 +1,9 @@
-import { createSVG, escapeHTML } from "./utils.ts";
+import {
+  createSVG,
+  escapeHTML,
+  getTimezoneOffsetFromRequest,
+  isViaCamo,
+} from "./utils.ts";
 
 const WAIT_BEFORE_PURGE = 1000;
 const USER_AGENT = "svg-clock/1.0.0";
@@ -12,17 +17,26 @@ export interface Env {
   readonly PURGE_TOKEN: string;
 }
 
-function getTimestampFromPathname(
-  pathname: string
+function getTimestampFromRequest(
+  request: Request,
+  timestamp = Date.now()
 ): [ts: number, dynamic: boolean] | undefined {
+  const pathname = new URL(request.url).pathname;
+
   let match;
   if (/^\/utc\.svg$/i.test(pathname)) {
-    return [Date.now(), true];
+    return [timestamp, true];
+  }
+
+  if (/^\/local\.svg$/i.test(pathname)) {
+    const timezoneOffset =
+      getTimezoneOffsetFromRequest(request, timestamp) ?? 0;
+    return [timestamp + timezoneOffset * 60_000, true];
   }
 
   if ((match = /^\/utc([+-])(\d\d)(\d\d)\.svg$/i.exec(pathname))) {
     return [
-      Date.now() +
+      timestamp +
         (match[1] === "-" ? -1 : 1) *
           (parseInt(match[2], 10) * 60 + parseInt(match[3], 10)) *
           60 *
@@ -56,14 +70,12 @@ export default {
       return new Response("Method not allowed", { status: 405 });
     }
 
-    const viaCamo = /camo/i.test(
-      request.headers.get("User-Agent") ?? request.headers.get("Via") ?? ""
-    );
+    const viaCamo = isViaCamo(request);
 
     const url = new URL(request.url);
     const normalizedURL = url.toString();
 
-    const timestamp = getTimestampFromPathname(url.pathname);
+    const timestamp = getTimestampFromRequest(request);
     if (!timestamp) {
       return new Response("Not found", { status: 404 });
     }
