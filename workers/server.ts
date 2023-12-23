@@ -80,8 +80,9 @@ export default {
       return new Response("Not found", { status: 404 });
     }
 
-    const linkURL =
-      url.searchParams.get("link") === "repository" ? LINK_URL_REPOSITORY : "";
+    const linkURL = { self: normalizedURL, repository: LINK_URL_REPOSITORY }[
+      url.searchParams.get("link") ?? "none"
+    ];
 
     const [ts, dynamic] = timestamp;
     const tsWithOffset =
