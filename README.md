@@ -4,6 +4,10 @@
 
 ![SVG Clock](https://svgclock.abelia.workers.dev/utc.svg)
 
+## Local (possibly inaccurate if via camo, [direct link](https://svgclock.abelia.workers.dev/local.svg))
+
+![SVG Clock](https://svgclock.abelia.workers.dev/local.svg)
+
 ## JST (UTC+09:00)
 
 ![SVG Clock](https://svgclock.abelia.workers.dev/utc+0900.svg)
